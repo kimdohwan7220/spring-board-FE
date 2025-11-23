@@ -12,6 +12,10 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+html {
+  overflow-y: scroll; 
+}
+
 * {
   box-sizing: border-box;
 }
@@ -23,6 +27,12 @@ a {
 }
 a:hover {
   color: #535bf2;
+}
+
+.logo-title {
+  font-family: 'Poppins', 'Jua', sans-serif;
+  font-weight: 700;
+  color: #4A403A;
 }
 
 body {

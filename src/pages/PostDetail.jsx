@@ -1,98 +1,47 @@
 // src/pages/PostDetail.jsx
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import Navbar from "../components/Navbar";
 import axios from "axios";
-import { AiOutlineHeart, AiFillHeart } from "react-icons/ai";
 
 function PostDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-
   const [post, setPost] = useState(null);
+  const username = localStorage.getItem("username");
   const [liked, setLiked] = useState(false);
-  const [likes, setLikes] = useState(0);
 
-  // ⭐ 게시글 불러오기
+  // 날짜 포맷 함수
+  const formatDate = (dateString) => {
+    const d = new Date(dateString);
+    return d.toLocaleString("ko-KR", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
+  // 게시글 조회 + 조회수 증가
   useEffect(() => {
     axios
       .get(`http://localhost:8080/posts/${id}`)
-      .then((res) => {
-        setPost(res.data);
-        setLikes(res.data.likes || 0);
-      })
+      .then((res) => setPost(res.data))
       .catch(() => alert("게시글 로딩 실패"));
+
+    axios.post(`http://localhost:8080/posts/${id}/views`);
   }, [id]);
 
-  // 로딩 중
-  if (!post) return <p style={{ textAlign: "center" }}>로딩중...</p>;
-
-  // ⭐ 좋아요 토글 (프론트 임시)
-  const toggleLike = () => {
-    if (liked) {
-      setLikes(likes - 1);
-    } else {
-      setLikes(likes + 1);
-    }
-    setLiked(!liked);
-  };
+  if (!post)
+    return <p style={{ textAlign: "center", marginTop: "40px" }}>로딩중...</p>;
 
   return (
-    <div>
+    <>
+      {/* 공통 네브바 */}
+      <Navbar />
 
-      {/* ====================== 상단바 ====================== */}
-      <div
-        style={{
-          width: "100%",
-          padding: "15px 40px",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          position: "sticky",
-          top: 0,
-          background: "#FFF8EE",
-          borderBottom: "1px solid #E2D9CF",
-          zIndex: 10,
-        }}
-      >
-        {/* 로고 → 게시글 목록 이동 */}
-        <img
-          src="/Logo.png"
-          alt="logo"
-          onClick={() => navigate("/posts")}
-          style={{
-            width: "60px",
-            height: "60px",
-            borderRadius: "50%",
-            cursor: "pointer",
-          }}
-        />
-
-        <h2
-          style={{
-            margin: 0,
-            fontSize: "32px",
-            color: "#4A403A",
-            fontWeight: "700",
-          }}
-        >
-          Meer Board
-        </h2>
-
-        {/* 프로필 → 마이페이지 이동 */}
-        <img
-          src="/profile.png"
-          alt="profile"
-          onClick={() => navigate("/mypage")}
-          style={{
-            width: "45px",
-            height: "45px",
-            borderRadius: "50%",
-            cursor: "pointer",
-          }}
-        />
-      </div>
-
-      {/* ====================== 본문 ====================== */}
+      {/* 전체 컨테이너 */}
       <div
         style={{
           maxWidth: "800px",
@@ -101,7 +50,13 @@ function PostDetail() {
         }}
       >
         {/* 제목 */}
-        <h1 style={{ fontSize: "32px", color: "#6B4F3A", marginTop: "30px" }}>
+        <h1
+          style={{
+            fontSize: "32px",
+            color: "#6B4F3A",
+            marginTop: "30px",
+          }}
+        >
           {post.title}
         </h1>
 
@@ -118,23 +73,20 @@ function PostDetail() {
           }}
         >
           <span>작성자: {post.writer}</span>
-          <span>작성일: {post.createdAt}</span>
+          <span>작성일: {formatDate(post.createdAt)}</span>
         </div>
 
         <hr />
 
-        {/* 내용 */}
+        {/* 본문 */}
         <div
           style={{
-            margin: "20px 0",
+            minHeight: "200px",
             whiteSpace: "pre-wrap",
             lineHeight: "1.7",
             color: "#6B4F3A",
-
-            minHeight: "400px",  
-            padding: "10px",
-
-            overflow: "visible", 
+            marginTop: "20px",
+            marginBottom: "20px",
           }}
         >
           {post.content}
@@ -142,37 +94,40 @@ function PostDetail() {
 
         <hr />
 
-        {/* 좋아요/댓글/조회 */}
+        {/* 좋아요 / 댓글 / 조회 */}
         <div
           style={{
             display: "flex",
             gap: "20px",
             marginTop: "20px",
             color: "#6B4F3A",
-            fontWeight: 600,
-            alignItems: "center",
+            fontWeight: "600",
+            fontSize: "18px",
           }}
         >
-          {/* 좋아요 버튼 */}
+          {/* ❤️ 좋아요 */}
           <span
-            style={{
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              gap: "6px",
+            style={{ cursor: "pointer" }}
+            onClick={() => {
+              axios
+                .post(
+                  `http://localhost:8080/posts/${id}/like?username=${username}`
+                )
+                .then((res) => {
+                  setPost(res.data);
+                  setLiked(!liked);
+                })
+                .catch(() => alert("좋아요 실패"));
             }}
-            onClick={toggleLike}
           >
-            {liked ? (
-              <AiFillHeart size={22} color="#D97C7C" />
-            ) : (
-              <AiOutlineHeart size={22} color="#6B4F3A" />
-            )}
-            {likes}
+            {liked ? "❤️" : "🤍"} {post.likes}
           </span>
 
-          <span>💬 댓글 {post.commentCount || 0}</span>
-          <span>👁 조회 {post.views || 0}</span>
+          {/* 댓글 */}
+          <span>💬 {post.commentCount}</span>
+
+          {/* 조회수 */}
+          <span>👁 {post.views}</span>
         </div>
 
         <hr style={{ marginTop: "25px" }} />
@@ -181,7 +136,7 @@ function PostDetail() {
         <h3 style={{ color: "#4A403A" }}>댓글</h3>
         <p style={{ color: "#7A6A58" }}>(댓글 기능은 곧 구현 예정)</p>
       </div>
-    </div>
+    </>
   );
 }
 

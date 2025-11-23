@@ -10,7 +10,7 @@ function Login() {
     e.preventDefault();
 
     if (id === "yuna7220" && pw === "1234") {
-      alert("로그인 성공!");
+      localStorage.setItem("username", id); 
       navigate("/posts");
     } else {
       alert("로그인 실패!");
@@ -18,13 +18,13 @@ function Login() {
   };
 
   return (
-      <div style={{
-        minHeight: "100vh",
-        display: "flex",
-        flexDirection: "column", 
-        justifyContent: "center",
-        alignItems: "center",
-      }}>
+    <div style={{
+      minHeight: "100vh",
+      display: "flex",
+      flexDirection: "column",
+      justifyContent: "center",
+      alignItems: "center",
+    }}>
       {/* 🔹 로고 이미지 (더 크게) */}
       <img
         src="/Logo.png"
