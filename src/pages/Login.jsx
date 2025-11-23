@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
 
 function Login() {
   const navigate = useNavigate();
@@ -9,12 +10,17 @@ function Login() {
   const handleLogin = (e) => {
     e.preventDefault();
 
-    if (id === "yuna7220" && pw === "1234") {
-      localStorage.setItem("username", id); 
-      navigate("/posts");
-    } else {
-      alert("로그인 실패!");
-    }
+    axios
+      .post("http://localhost:8080/auth/login", {
+        username: id,
+        password: pw,
+      })
+      .then(() => {
+        localStorage.setItem("username", id); // ⭐ 로그인 성공 시 username 저장
+        alert("로그인 성공!");
+        navigate("/posts");
+      })
+      .catch(() => alert("로그인 실패"));
   };
 
   return (
@@ -30,7 +36,7 @@ function Login() {
         src="/Logo.png"
         alt="logo"
         style={{
-          width: "120px",       // 👈 더 크게
+          width: "120px",
           height: "120px",
           borderRadius: "50%",
           marginBottom: "20px",
@@ -68,7 +74,7 @@ function Login() {
                 borderRadius: "8px",
                 border: "1px solid #D1BFA7",
                 marginTop: "5px",
-                backgroundColor: "#FFFDF9",     // 👈 흰색에 가까운 베이지
+                backgroundColor: "#FFFDF9",
                 color: "#4A403A",
                 boxSizing: "border-box",
               }}
@@ -89,7 +95,7 @@ function Login() {
                 borderRadius: "8px",
                 border: "1px solid #D1BFA7",
                 marginTop: "5px",
-                backgroundColor: "#FFFDF9",     // 👈 흰 베이지
+                backgroundColor: "#FFFDF9",
                 color: "#4A403A",
                 boxSizing: "border-box",
               }}
@@ -102,7 +108,7 @@ function Login() {
             style={{
               width: "100%",
               padding: "12px",
-              background: "#D9B89C",       // 👈 부드러운 카푸치노 베이지
+              background: "#D9B89C",
               color: "#4A332C",
               border: "none",
               borderRadius: "8px",

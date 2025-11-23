@@ -120,7 +120,7 @@ function PostDetail() {
                 .catch(() => alert("좋아요 실패"));
             }}
           >
-            {liked ? "❤️" : "🤍"} {post.likes}
+            {liked ? "🤍" : "❤️" } {post.likes}
           </span>
 
           {/* 댓글 */}
