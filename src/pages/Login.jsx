@@ -18,14 +18,13 @@ function Login() {
   };
 
   return (
-    <div
-      style={{
-        width: "100%",
+      <div style={{
+        minHeight: "100vh",
         display: "flex",
-        flexDirection: "column",
+        flexDirection: "column", 
+        justifyContent: "center",
         alignItems: "center",
-      }}
-    >
+      }}>
       {/* 🔹 로고 이미지 (더 크게) */}
       <img
         src="/Logo.png"

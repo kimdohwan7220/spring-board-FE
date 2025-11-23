@@ -26,9 +26,10 @@ function Register() {
   return (
     <div
       style={{
-        width: "100%",
+        minHeight: "100vh",
         display: "flex",
-        flexDirection: "column",
+        flexDirection: "column", 
+        justifyContent: "center",
         alignItems: "center",
       }}
     >

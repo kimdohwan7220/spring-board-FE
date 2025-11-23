@@ -28,9 +28,6 @@ a:hover {
 
 body {
   margin: 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
   min-height: 100vh;
   background: linear-gradient(180deg, #FFF8EE 0%, #FFF4E8 100%);
 }
