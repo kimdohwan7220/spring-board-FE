@@ -1,16 +1,28 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import axios from "axios";
 
 function Register() {
   const navigate = useNavigate();
   const [id, setId] = useState("");
   const [pw, setPw] = useState("");
 
-  const handleRegister = (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
 
-    alert(`회원가입 완료!\nID: ${id}`);
-    navigate("/"); // 로그인 페이지로 이동
+    try {
+      // 🔥 백엔드로 회원가입 요청 보내기
+      await axios.post("http://localhost:8080/auth/register", {
+        username: id,
+        password: pw,
+      });
+
+      alert("회원가입이 완료되었습니다!");
+      navigate("/");  // 로그인 페이지로 이동
+
+    } catch (err) {
+      alert("회원가입 실패! 이미 존재하는 아이디가 있을 수 있습니다.");
+    }
   };
 
   return (

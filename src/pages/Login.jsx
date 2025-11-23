@@ -9,59 +9,121 @@ function Login() {
   const handleLogin = (e) => {
     e.preventDefault();
 
-    // 🔥 지금은 임시 로그인 로직
-    if (id === "yuna" && pw === "1234") {
+    if (id === "yuna7220" && pw === "1234") {
       alert("로그인 성공!");
-      navigate("/posts");   // 게시판으로 이동
+      navigate("/posts");
     } else {
       alert("로그인 실패!");
     }
   };
 
   return (
-    <div style={{ maxWidth: "400px", margin: "0 auto", padding: "20px" }}>
-      <h2>로그인</h2>
+    <div
+      style={{
+        width: "100%",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+      }}
+    >
+      {/* 🔹 로고 이미지 (더 크게) */}
+      <img
+        src="/Logo.png"
+        alt="logo"
+        style={{
+          width: "120px",       // 👈 더 크게
+          height: "120px",
+          borderRadius: "50%",
+          marginBottom: "20px",
+          boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
+        }}
+      />
 
-      <form onSubmit={handleLogin}>
-        <div style={{ marginBottom: "15px" }}>
-          <label>아이디</label><br />
-          <input
-            type="text"
-            value={id}
-            onChange={(e) => setId(e.target.value)}
-            required
-            style={{ width: "100%", padding: "8px" }}
-          />
-        </div>
+      <h2 style={{ textAlign: "center", marginBottom: "20px", color: "#6B4F3A" }}>
+        로그인
+      </h2>
 
-        <div style={{ marginBottom: "15px" }}>
-          <label>비밀번호</label><br />
-          <input
-            type="password"
-            value={pw}
-            onChange={(e) => setPw(e.target.value)}
-            required
-            style={{ width: "100%", padding: "8px" }}
-          />
-        </div>
+      {/* 🔹 로그인 폼 박스 */}
+      <div
+        style={{
+          width: "360px",
+          padding: "25px",
+          border: "1px solid #E8DCCF",
+          borderRadius: "14px",
+          backgroundColor: "rgba(255,255,255,0.85)",
+          boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+        }}
+      >
+        <form onSubmit={handleLogin}>
+          {/* 아이디 */}
+          <div style={{ marginBottom: "15px" }}>
+            <label style={{ color: "#6B4F3A", fontWeight: "600" }}>아이디</label>
+            <input
+              type="text"
+              value={id}
+              onChange={(e) => setId(e.target.value)}
+              required
+              style={{
+                width: "100%",
+                padding: "12px",
+                borderRadius: "8px",
+                border: "1px solid #D1BFA7",
+                marginTop: "5px",
+                backgroundColor: "#FFFDF9",     // 👈 흰색에 가까운 베이지
+                color: "#4A403A",
+                boxSizing: "border-box",
+              }}
+            />
+          </div>
 
-        <button
-          type="submit"
-          style={{
-            width: "100%",
-            padding: "10px",
-            background: "black",
-            color: "white",
-            border: "none",
-          }}
-        >
-          로그인
-        </button>
-      </form>
+          {/* 비밀번호 */}
+          <div style={{ marginBottom: "15px" }}>
+            <label style={{ color: "#6B4F3A", fontWeight: "600" }}>비밀번호</label>
+            <input
+              type="password"
+              value={pw}
+              onChange={(e) => setPw(e.target.value)}
+              required
+              style={{
+                width: "100%",
+                padding: "12px",
+                borderRadius: "8px",
+                border: "1px solid #D1BFA7",
+                marginTop: "5px",
+                backgroundColor: "#FFFDF9",     // 👈 흰 베이지
+                color: "#4A403A",
+                boxSizing: "border-box",
+              }}
+            />
+          </div>
 
-      <p style={{ marginTop: "15px" }}>
+          {/* 로그인 버튼 */}
+          <button
+            type="submit"
+            style={{
+              width: "100%",
+              padding: "12px",
+              background: "#D9B89C",       // 👈 부드러운 카푸치노 베이지
+              color: "#4A332C",
+              border: "none",
+              borderRadius: "8px",
+              fontSize: "16px",
+              fontWeight: "600",
+              cursor: "pointer",
+              transition: "0.2s",
+            }}
+          >
+            로그인
+          </button>
+        </form>
+      </div>
+
+      {/* 로그인 아래 텍스트 */}
+      <p style={{ marginTop: "18px", color: "#6B4F3A" }}>
         아직 회원이 아니신가요?{" "}
-        <Link to="/register">회원가입</Link>
+        <Link to="/register" style={{ color: "#A67C52", fontWeight: "600" }}>
+          회원가입
+        </Link>
       </p>
     </div>
   );
