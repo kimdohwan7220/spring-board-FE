@@ -1,16 +1,51 @@
-# React + Vite
+# 🌐 Spring Board FE  
+React 기반 커뮤니티 서비스의 프론트엔드 레포지토리입니다.  
+회원가입 → 로그인 → 게시글 목록 → 게시글 상세 → 댓글/좋아요 → 마이페이지  
+까지 이어지는 **완성형 게시판 서비스**를 목표로 개발하고 있습니다.
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+---
 
-Currently, two official plugins are available:
+## 🚀 주요 기능 (최종 목표)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### 🔐 1. 사용자 인증
+- 회원가입  
+- 로그인  
+- JWT 또는 세션 기반 로그인 유지  
+- 로그인한 사용자만 게시판 기능 이용 가능  
 
-## React Compiler
+---
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### 📝 2. 게시글 기능
+- 게시글 목록 보기  
+- 게시글 상세 보기  
+- 게시글 작성  
+- 게시글 수정  
+- 게시글 삭제  
 
-## Expanding the ESLint configuration
+게시글 정보:
+- 제목  
+- 내용  
+- 작성자  
+- 작성 시간  
+- 좋아요 수  
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+---
+
+### 💬 3. 댓글 기능
+- 댓글 작성  
+- 댓글 수정  
+- 댓글 삭제  
+- 대댓글(스레드) 확장 가능  
+
+---
+
+### ❤️ 4. 좋아요 기능
+- 게시글 좋아요 / 좋아요 취소  
+- 실시간 좋아요 수 반영  
+
+---
+
+### 👤 5. 마이페이지 (프로필)
+- 사용자 프로필 조회  
+- 닉네임, 이메일, 가입일 등 확인  
+- 내가 작성한 글 / 내가 좋아요한 글 보기 (확장 예정)

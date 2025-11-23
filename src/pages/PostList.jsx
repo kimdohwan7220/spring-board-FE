@@ -1,12 +1,11 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import { fetchPosts } from "../api/posts";
 
 function PostList() {
   const [posts, setPosts] = useState([]);
 
   useEffect(() => {
-    axios.get("http://localhost:8080/posts")
-      .then(res => setPosts(res.data));
+    fetchPosts().then(res => setPosts(res.data));
   }, []);
 
   return (
