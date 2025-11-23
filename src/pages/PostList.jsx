@@ -1,3 +1,4 @@
+// src/pages/PostList.jsx
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -7,10 +8,23 @@ function PostList() {
   const [posts, setPosts] = useState([]);
 
   useEffect(() => {
-    axios.get("http://localhost:8080/posts")
-      .then(res => setPosts(res.data))
+    axios
+      .get("http://localhost:8080/posts")
+      .then((res) => setPosts(res.data))
       .catch(() => alert("게시글 불러오기 실패"));
   }, []);
+
+  // 날짜 포맷 함수
+  const formatDate = (dateString) => {
+    const d = new Date(dateString);
+    return d.toLocaleString("ko-KR", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
 
   return (
     <div
@@ -23,8 +37,7 @@ function PostList() {
         alignItems: "center",
       }}
     >
-
-      {/* -------------------- 상단바 -------------------- */}
+      {/* 상단바 */}
       <div
         style={{
           width: "100%",
@@ -35,7 +48,7 @@ function PostList() {
           marginBottom: "16px",
         }}
       >
-        {/* 왼쪽 로고 */}
+        {/* 로고 */}
         <img
           src="/Logo.png"
           alt="logo"
@@ -48,19 +61,18 @@ function PostList() {
           onClick={() => navigate("/posts")}
         />
 
-        {/* 중앙 타이틀 */}
         <h2
           style={{
             margin: 0,
             color: "#4A403A",
             fontWeight: "700",
-            fontSize: "60px",
+            fontSize: "40px",
           }}
         >
           Meer-Board
         </h2>
 
-        {/* 오른쪽 프로필 */}
+        {/* 프로필 */}
         <img
           src="/profile.png"
           alt="profile"
@@ -70,42 +82,39 @@ function PostList() {
             borderRadius: "50%",
             cursor: "pointer",
           }}
-          onClick={() => alert("프로필 페이지 예정")}
         />
       </div>
 
-      {/* -------------------- 구분선 -------------------- */}
+      {/* 구분선 */}
       <hr
         style={{
           width: "100%",
           border: "none",
           borderTop: "1px solid #E8DCCF",
-          marginBottom: "25px",
+          marginBottom: "20px",
         }}
       />
 
-      {/* -------------------- Board List 제목 (단독 라인) -------------------- */}
+      {/* Board List 제목 */}
       <h1
         style={{
           margin: 0,
           color: "#6B4F3A",
-          fontSize: "32px",
-          fontWeight: "700",
-          textAlign: "center",
-          marginBottom: "8px", // 제목 아래 간격
+          fontSize: "60px",
+          marginBottom: "8px",
         }}
       >
         Board List
       </h1>
 
-      {/* -------------------- 게시물 작성 버튼 (오른쪽 정렬) -------------------- */}
+      {/* 게시물 작성 버튼 */}
       <div
         style={{
           width: "100%",
           maxWidth: "900px",
           display: "flex",
           justifyContent: "flex-end",
-          marginBottom: "25px",   // 버튼 아래 간격 넓힘
+          marginBottom: "25px",
         }}
       >
         <button
@@ -124,14 +133,14 @@ function PostList() {
         </button>
       </div>
 
-      {/* -------------------- 게시글 카드 목록 -------------------- */}
+      {/* 게시글 카드 목록 */}
       <div
         style={{
           width: "100%",
           maxWidth: "700px",
           display: "flex",
           flexDirection: "column",
-          gap: "20px",          // 카드 간 간격 넓힘
+          gap: "20px",
         }}
       >
         {posts.length === 0 ? (
@@ -157,15 +166,58 @@ function PostList() {
                 (e.currentTarget.style.transform = "translateY(0)")
               }
             >
+              {/* 제목 */}
               <h2 style={{ margin: 0, color: "#4A403A" }}>{p.title}</h2>
-              <p style={{ marginTop: "8px", color: "#8A6E5A" }}>
+
+              {/* 작성자 */}
+              <p
+                style={{
+                  marginTop: "6px",
+                  color: "#8A6E5A",
+                  fontSize: "14px",
+                }}
+              >
                 작성자: <b>{p.writer}</b>
               </p>
+
+              {/* 좋아요 / 댓글 / 조회 + 작성일 → 양쪽 정렬 */}
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between", // ⭐ 핵심
+                  alignItems: "center",
+                  marginTop: "10px",
+                }}
+              >
+                {/* 왼쪽 - 좋아요/댓글/조회 */}
+                <div
+                  style={{
+                    display: "flex",
+                    gap: "18px",
+                    color: "#B28A72",
+                    fontWeight: "600",
+                    fontSize: "14px",
+                  }}
+                >
+                  <span>❤️ {p.likes || 0}</span>
+                  <span>💬 {p.commentCount || 0}</span>
+                  <span>👁 {p.views || 0}</span>
+                </div>
+
+                {/* 오른쪽 - 작성일 */}
+                <span
+                  style={{
+                    fontSize: "13px",
+                    color: "#B28A72",
+                  }}
+                >
+                  {formatDate(p.createdAt)}
+                </span>
+              </div>
             </div>
           ))
         )}
       </div>
-
     </div>
   );
 }
