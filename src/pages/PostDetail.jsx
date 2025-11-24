@@ -10,12 +10,16 @@ function PostDetail() {
   const navigate = useNavigate();
 
   const [post, setPost] = useState(null);
-  const [liked, setLiked] = useState(false);
+  const [comments, setComments] = useState([]);
+  const [commentContent, setCommentContent] = useState("");
 
-  // ⭐ 날짜 포맷 함수
-  const formatDate = (dateString) => {
-    const d = new Date(dateString);
-    return d.toLocaleString("ko-KR", {
+  // ⭐ 댓글 수정 상태
+  const [editingId, setEditingId] = useState(null);
+  const [editContent, setEditContent] = useState("");
+
+  // 날짜 포맷
+  const formatDate = (d) => {
+    return new Date(d).toLocaleString("ko-KR", {
       year: "numeric",
       month: "2-digit",
       day: "2-digit",
@@ -24,83 +28,93 @@ function PostDetail() {
     });
   };
 
+  // 초기 로딩
   useEffect(() => {
-    const pid = Number(id);
-
-    const likedList = JSON.parse(localStorage.getItem("likedPosts") || "[]");
-    setLiked(likedList.includes(pid));
+    axios
+      .get(`http://localhost:8080/posts/${id}`, { params: { username } })
+      .then((res) => setPost(res.data));
 
     axios
-      .get(`http://localhost:8080/posts/${id}`)
-      .then((res) => setPost(res.data))
-      .catch(() => alert("게시글 로딩 실패"));
+      .get(`http://localhost:8080/posts/${id}/comments`)
+      .then((res) => setComments(res.data));
 
     axios.post(`http://localhost:8080/posts/${id}/views`).catch(() => {});
   }, [id]);
 
-  const handleToggleLike = () => {
-    const pid = Number(id);
-    const likedList = JSON.parse(localStorage.getItem("likedPosts") || "[]");
+  // 댓글 작성
+  const handleAddComment = () => {
+    if (!commentContent.trim()) return;
 
+    axios
+      .post(`http://localhost:8080/posts/${id}/comments`, {
+        writer: username,
+        content: commentContent,
+      })
+      .then(() => {
+        setCommentContent("");
+        return axios.get(`http://localhost:8080/posts/${id}/comments`);
+      })
+      .then((res) => setComments(res.data));
+  };
+
+  // 댓글 삭제
+  const handleDeleteComment = (commentId) => {
+    if (!confirm("댓글을 삭제하시겠습니까?")) return;
+
+    axios
+      .delete(`http://localhost:8080/posts/${id}/comments/${commentId}`)
+      .then(() => axios.get(`http://localhost:8080/posts/${id}/comments`))
+      .then((res) => setComments(res.data));
+  };
+
+  // 댓글 수정 저장
+  const handleUpdateComment = (commentId) => {
+    if (!editContent.trim()) return;
+
+    axios
+      .put(
+        `http://localhost:8080/posts/${id}/comments/${commentId}`,
+        { content: editContent }
+      )
+      .then(() => axios.get(`http://localhost:8080/posts/${id}/comments`))
+      .then((res) => {
+        setComments(res.data);
+        setEditingId(null);
+        setEditContent("");
+      })
+      .catch(() => alert("댓글 수정 실패"));
+  };
+
+  // 좋아요
+  const handleToggleLike = () => {
     axios
       .post(
         `http://localhost:8080/posts/${id}/like`,
         {},
         { params: { username } }
       )
-      .then((res) => {
-        setPost(res.data);
-
-        if (liked) {
-          const newList = likedList.filter((v) => v !== pid);
-          localStorage.setItem("likedPosts", JSON.stringify(newList));
-          setLiked(false);
-        } else {
-          likedList.push(pid);
-          localStorage.setItem("likedPosts", JSON.stringify(likedList));
-          setLiked(true);
-        }
-      })
-      .catch(() => alert("좋아요 실패"));
+      .then((res) => setPost(res.data));
   };
 
-  // ⭐ 삭제 기능
-  const handleDelete = () => {
-    if (!confirm("정말 삭제하시겠습니까?")) return;
+  // 게시글 삭제
+  const handleDeletePost = () => {
+    if (!confirm("게시글을 삭제하시겠습니까?")) return;
 
-    axios
-      .delete(`http://localhost:8080/posts/${id}`)
-      .then(() => {
-        alert("게시글이 삭제되었습니다.");
-        navigate("/posts");
-      })
-      .catch(() => alert("삭제 실패"));
+    axios.delete(`http://localhost:8080/posts/${id}`).then(() => {
+      alert("삭제되었습니다.");
+      navigate("/posts");
+    });
   };
 
-  if (!post) {
-    return <p style={{ textAlign: "center" }}>로딩중...</p>;
-  }
+  if (!post) return <p style={{ textAlign: "center" }}>로딩중...</p>;
 
   return (
     <>
       <Navbar />
 
-      <div
-        style={{
-          maxWidth: "800px",
-          margin: "0 auto",
-          padding: "20px",
-        }}
-      >
+      <div style={{ maxWidth: "800px", margin: "0 auto", padding: "20px" }}>
         {/* 제목 */}
-        <h1
-          style={{
-            fontSize: "32px",
-            color: "#6B4F3A",
-            marginTop: "30px",
-            fontFamily: "'Poppins','Jua',sans-serif",
-          }}
-        >
+        <h1 style={{ fontSize: "32px", color: "#6B4F3A", marginTop: "30px" }}>
           {post.title}
         </h1>
 
@@ -114,7 +128,6 @@ function PostDetail() {
             margin: "15px 0",
             color: "#6B4F3A",
             fontWeight: "600",
-            fontFamily: "'Poppins','Jua',sans-serif",
           }}
         >
           <span>작성자: {post.writer}</span>
@@ -131,48 +144,35 @@ function PostDetail() {
             lineHeight: "1.7",
             color: "#6B4F3A",
             marginTop: "20px",
-            marginBottom: "20px",
-            fontFamily: "'Poppins','Jua',sans-serif",
           }}
         >
           {post.content}
         </div>
 
-        {/* ⭐ 수정 / 삭제 (작성자 본인일 때만) */}
+        {/* 수정 / 삭제 */}
         {post.writer === username && (
-          <div
-            style={{
-              display: "flex",
-              gap: "12px",
-              marginTop: "10px",
-              marginBottom: "25px",
-            }}
-          >
+          <div style={{ display: "flex", gap: "10px", margin: "20px 0" }}>
             <button
               onClick={() => navigate(`/posts/${id}/edit`)}
               style={{
                 padding: "10px 16px",
                 backgroundColor: "#C4A58A",
                 color: "#4A332C",
-                border: "none",
                 borderRadius: "8px",
-                cursor: "pointer",
-                fontWeight: "600",
+                border: "none",
               }}
             >
               ✏ 수정
             </button>
 
             <button
-              onClick={handleDelete}
+              onClick={handleDeletePost}
               style={{
                 padding: "10px 16px",
                 backgroundColor: "#E77B7B",
                 color: "white",
-                border: "none",
                 borderRadius: "8px",
-                cursor: "pointer",
-                fontWeight: "600",
+                border: "none",
               }}
             >
               🗑 삭제
@@ -182,40 +182,155 @@ function PostDetail() {
 
         <hr />
 
-        {/* 좋아요 / 댓글 / 조회 */}
+        {/* 좋아요 */}
         <div
           style={{
             display: "flex",
             gap: "20px",
-            marginTop: "20px",
+            marginTop: "10px",
             color: "#6B4F3A",
             fontWeight: "600",
-            fontFamily: "'Poppins','Jua',sans-serif",
             cursor: "pointer",
           }}
         >
           <span onClick={handleToggleLike}>
-            {liked ? "❤️" : "🤍"} {post.likes}
+            {post.liked ? "❤️" : "🤍"} {post.likes}
           </span>
-
-          <span>💬 {post.commentCount}</span>
+          <span>💬 {comments.length}</span>
           <span>👁 {post.views}</span>
         </div>
 
-        <hr style={{ marginTop: "25px" }} />
+        <hr />
 
-        {/* 댓글 영역 */}
-        <h3
-          style={{
-            color: "#4A403A",
-            fontFamily: "'Poppins','Jua',sans-serif",
-          }}
-        >
-          댓글
-        </h3>
-        <p style={{ color: "#7A6A58", fontFamily: "'Poppins','Jua',sans-serif" }}>
-          (댓글 기능은 곧 구현 예정)
-        </p>
+        {/* 댓글 입력 */}
+        <h3 style={{ color: "#4A403A" }}>댓글</h3>
+
+        <div style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
+          <input
+            value={commentContent}
+            onChange={(e) => setCommentContent(e.target.value)}
+            placeholder="댓글을 입력하세요"
+            style={{
+              flex: 1,
+              padding: "10px",
+              borderRadius: "8px",
+              border: "1px solid #D1BFA7",
+            }}
+          />
+          <button
+            onClick={handleAddComment}
+            style={{
+              padding: "10px 16px",
+              backgroundColor: "#D9B89C",
+              borderRadius: "8px",
+              border: "none",
+            }}
+          >
+            작성
+          </button>
+        </div>
+
+        {/* 댓글 리스트 */}
+        {comments.map((c) => (
+          <div
+            key={c.id}
+            style={{
+              padding: "12px",
+              borderBottom: "1px solid #E8DCCF",
+              marginBottom: "10px",
+            }}
+          >
+            {/* 작성자 + 날짜 */}
+            <b>{c.writer}</b>
+            <span style={{ marginLeft: "10px", color: "#A59080" }}>
+              {formatDate(c.createdAt)}
+            </span>
+
+            {/* ⭐ 수정 모드 */}
+            {editingId === c.id ? (
+              <div style={{ marginTop: "10px" }}>
+                <textarea
+                  value={editContent}
+                  onChange={(e) => setEditContent(e.target.value)}
+                  style={{
+                    width: "100%",
+                    padding: "10px",
+                    borderRadius: "8px",
+                    border: "1px solid #D1BFA7",
+                    resize: "none",
+                  }}
+                />
+
+                <div style={{ marginTop: "10px", display: "flex", gap: "10px" }}>
+                  <button
+                    onClick={() => handleUpdateComment(c.id)}
+                    style={{
+                      padding: "6px 12px",
+                      backgroundColor: "#C4A58A",
+                      borderRadius: "8px",
+                      border: "none",
+                      color: "#4A332C",
+                    }}
+                  >
+                    저장
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setEditingId(null);
+                      setEditContent("");
+                    }}
+                    style={{
+                      padding: "6px 12px",
+                      backgroundColor: "#E5E5E5",
+                      borderRadius: "8px",
+                      border: "none",
+                    }}
+                  >
+                    취소
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <p style={{ marginTop: "5px" }}>{c.content}</p>
+            )}
+
+            {/* 수정/삭제 버튼 */}
+            {c.writer === username && editingId !== c.id && (
+              <div>
+                <button
+                  onClick={() => {
+                    setEditingId(c.id);
+                    setEditContent(c.content);
+                  }}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    color: "#6B4F3A",
+                    cursor: "pointer",
+                    fontSize: "13px",
+                    marginRight: "10px",
+                  }}
+                >
+                  수정
+                </button>
+
+                <button
+                  onClick={() => handleDeleteComment(c.id)}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    color: "red",
+                    cursor: "pointer",
+                    fontSize: "13px",
+                  }}
+                >
+                  삭제
+                </button>
+              </div>
+            )}
+          </div>
+        ))}
       </div>
     </>
   );
