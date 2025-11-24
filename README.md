@@ -13,17 +13,17 @@
 
 ## 📸 화면 구성 (Screenshots)
 
-### 🔐 로그인 & 회원가입
+### 🔐 로그인 회원가입
 ![login](https://github.com/user-attachments/assets/c6cc171c-99be-43c7-9d14-57a50b69f1bd)
 
 ---
 
-### 🏠 게시글 목록 페이지
+### 🔐 회원가입
 ![post-list](https://github.com/user-attachments/assets/bd82d772-3341-471e-89ee-600c24350356)
 
 ---
 
-### 📝 게시글 상세 페이지
+### 📝 게시글 목록 페이지
 ![post-detail](https://github.com/user-attachments/assets/58de3f50-a7a4-44c1-8b1a-9e39ab2ef06c)
 
 ---
@@ -33,7 +33,7 @@
 
 ---
 
-### 🛠 게시글 수정 페이지
+### 🛠 게시글 상세 페이지
 ![post-edit](https://github.com/user-attachments/assets/45eae11e-de4f-4f9b-bd15-1c9ae4831dd3)
 
 ---
