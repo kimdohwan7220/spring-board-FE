@@ -1,38 +1,45 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 
-function PostCreate() {
+function PostEdit() {
+  const { id } = useParams();
   const navigate = useNavigate();
-
-  const username = localStorage.getItem("username") || "";
+  const username = localStorage.getItem("username");
 
   const [title, setTitle] = useState("");
-  const [writer] = useState(username); // 작성자는 로그인 유저로 고정
   const [content, setContent] = useState("");
 
+  // 기존 글 불러오기
+  useEffect(() => {
+    axios
+      .get(`http://localhost:8080/posts/${id}`)
+      .then((res) => {
+        setTitle(res.data.title);
+        setContent(res.data.content);
+      })
+      .catch(() => alert("게시글 로딩 실패"));
+  }, [id]);
+
+  // 수정 제출
   const handleSubmit = (e) => {
     e.preventDefault();
 
     axios
-      .post("http://localhost:8080/posts", {
+      .put(`http://localhost:8080/posts/${id}`, {
         title,
-        writer,
         content,
       })
       .then(() => {
-        alert("게시글이 등록되었습니다!");
-        navigate("/posts");
+        alert("게시글이 수정되었습니다!");
+        navigate(`/posts/${id}`);
       })
-      .catch(() => {
-        alert("등록 실패!");
-      });
+      .catch(() => alert("수정 실패"));
   };
 
   return (
     <>
-      {/* ⭐ 네브바 */}
       <Navbar />
 
       <div
@@ -47,11 +54,10 @@ function PostCreate() {
         }}
       >
         <h2 style={{ textAlign: "center", color: "#4A403A", marginBottom: "20px" }}>
-          ✏ 게시물 작성
+          📝 게시물 수정
         </h2>
 
         <form onSubmit={handleSubmit}>
-          {/* 제목 */}
           <div style={{ marginBottom: "15px" }}>
             <label style={{ color: "#6B4F3A", fontWeight: "600" }}>제목</label>
             <input
@@ -71,27 +77,6 @@ function PostCreate() {
             />
           </div>
 
-          {/* 작성자 (읽기 전용) */}
-          <div style={{ marginBottom: "15px" }}>
-            <label style={{ color: "#6B4F3A", fontWeight: "600" }}>작성자</label>
-            <input
-              type="text"
-              value={writer}
-              readOnly
-              style={{
-                width: "100%",
-                padding: "12px",
-                borderRadius: "8px",
-                border: "1px solid #D1BFA7",
-                marginTop: "5px",
-                backgroundColor: "#EFE7DD",
-                color: "#4A403A",
-                fontWeight: "600",
-              }}
-            />
-          </div>
-
-          {/* 내용 */}
           <div style={{ marginBottom: "15px" }}>
             <label style={{ color: "#6B4F3A", fontWeight: "600" }}>내용</label>
             <textarea
@@ -112,7 +97,6 @@ function PostCreate() {
             />
           </div>
 
-          {/* 작성 버튼 */}
           <button
             type="submit"
             style={{
@@ -127,7 +111,7 @@ function PostCreate() {
               fontSize: "16px",
             }}
           >
-            작성하기
+            수정 완료
           </button>
         </form>
       </div>
@@ -135,4 +119,4 @@ function PostCreate() {
   );
 }
 
-export default PostCreate;
+export default PostEdit;

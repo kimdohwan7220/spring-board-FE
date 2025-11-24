@@ -5,6 +5,7 @@ import PostList from "./pages/PostList";
 import PostCreate from "./pages/PostCreate";
 import PostDetail from "./pages/PostDetail"; 
 import MyPage from "./pages/MyPage";
+import PostEdit from "./pages/PostEdit";
 
 function App() {
   return (
@@ -17,6 +18,8 @@ function App() {
 
       <Route path="/posts/:id" element={<PostDetail />} />
       <Route path="/mypage" element={<MyPage />} />  
+
+      <Route path="/posts/:id/edit" element={<PostEdit />} />
     </Routes>
   );
 }
