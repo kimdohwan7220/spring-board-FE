@@ -1,4 +1,3 @@
-// src/pages/PostDetail.jsx
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -13,22 +12,18 @@ function PostDetail() {
   const [comments, setComments] = useState([]);
   const [commentContent, setCommentContent] = useState("");
 
-  // ⭐ 댓글 수정 상태
   const [editingId, setEditingId] = useState(null);
   const [editContent, setEditContent] = useState("");
 
-  // 날짜 포맷
-  const formatDate = (d) => {
-    return new Date(d).toLocaleString("ko-KR", {
+  const formatDate = (d) =>
+    new Date(d).toLocaleString("ko-KR", {
       year: "numeric",
       month: "2-digit",
       day: "2-digit",
       hour: "2-digit",
       minute: "2-digit",
     });
-  };
 
-  // 초기 로딩
   useEffect(() => {
     axios
       .get(`http://localhost:8080/posts/${id}`, { params: { username } })
@@ -38,10 +33,9 @@ function PostDetail() {
       .get(`http://localhost:8080/posts/${id}/comments`)
       .then((res) => setComments(res.data));
 
-    axios.post(`http://localhost:8080/posts/${id}/views`).catch(() => {});
+    axios.post(`http://localhost:8080/posts/${id}/views`).catch(() => { });
   }, [id]);
 
-  // 댓글 작성
   const handleAddComment = () => {
     if (!commentContent.trim()) return;
 
@@ -52,22 +46,35 @@ function PostDetail() {
       })
       .then(() => {
         setCommentContent("");
-        return axios.get(`http://localhost:8080/posts/${id}/comments`);
+        return Promise.all([
+          axios.get(`http://localhost:8080/posts/${id}`, { params: { username } }),
+          axios.get(`http://localhost:8080/posts/${id}/comments`)
+        ]);
       })
-      .then((res) => setComments(res.data));
+      .then(([postRes, commentsRes]) => {
+        setPost(postRes.data);
+        setComments(commentsRes.data);
+      });
   };
 
-  // 댓글 삭제
   const handleDeleteComment = (commentId) => {
     if (!confirm("댓글을 삭제하시겠습니까?")) return;
 
     axios
       .delete(`http://localhost:8080/posts/${id}/comments/${commentId}`)
-      .then(() => axios.get(`http://localhost:8080/posts/${id}/comments`))
-      .then((res) => setComments(res.data));
+      .then(() => {
+        return Promise.all([
+          axios.get(`http://localhost:8080/posts/${id}`, { params: { username } }),
+          axios.get(`http://localhost:8080/posts/${id}/comments`)
+        ]);
+      })
+      .then(([postRes, commentsRes]) => {
+        setPost(postRes.data);
+        setComments(commentsRes.data);
+      });
   };
 
-  // 댓글 수정 저장
+
   const handleUpdateComment = (commentId) => {
     if (!editContent.trim()) return;
 
@@ -81,11 +88,9 @@ function PostDetail() {
         setComments(res.data);
         setEditingId(null);
         setEditContent("");
-      })
-      .catch(() => alert("댓글 수정 실패"));
+      });
   };
 
-  // 좋아요
   const handleToggleLike = () => {
     axios
       .post(
@@ -96,7 +101,6 @@ function PostDetail() {
       .then((res) => setPost(res.data));
   };
 
-  // 게시글 삭제
   const handleDeletePost = () => {
     if (!confirm("게시글을 삭제하시겠습니까?")) return;
 
@@ -113,6 +117,7 @@ function PostDetail() {
       <Navbar />
 
       <div style={{ maxWidth: "800px", margin: "0 auto", padding: "20px" }}>
+
         {/* 제목 */}
         <h1 style={{ fontSize: "32px", color: "#6B4F3A", marginTop: "30px" }}>
           {post.title}
@@ -136,7 +141,7 @@ function PostDetail() {
 
         <hr />
 
-        {/* 내용 */}
+        {/* 본문 */}
         <div
           style={{
             minHeight: "200px",
@@ -149,7 +154,7 @@ function PostDetail() {
           {post.content}
         </div>
 
-        {/* 수정 / 삭제 */}
+        {/* 수정 삭제 */}
         {post.writer === username && (
           <div style={{ display: "flex", gap: "10px", margin: "20px 0" }}>
             <button
@@ -164,7 +169,6 @@ function PostDetail() {
             >
               ✏ 수정
             </button>
-
             <button
               onClick={handleDeletePost}
               style={{
@@ -238,97 +242,116 @@ function PostDetail() {
               padding: "12px",
               borderBottom: "1px solid #E8DCCF",
               marginBottom: "10px",
+              display: "flex",
+              gap: "12px",
             }}
           >
-            {/* 작성자 + 날짜 */}
-            <b>{c.writer}</b>
-            <span style={{ marginLeft: "10px", color: "#A59080" }}>
-              {formatDate(c.createdAt)}
-            </span>
+            {/* 프로필 이미지 */}
+            <img
+              src={
+                c.profileImage
+                  ? `http://localhost:8080${c.profileImage}`
+                  : "/default-profile.png"
+              }
+              alt="profile"
+              style={{
+                width: "40px",
+                height: "40px",
+                borderRadius: "50%",
+                objectFit: "cover",
+              }}
+            />
 
-            {/* ⭐ 수정 모드 */}
-            {editingId === c.id ? (
-              <div style={{ marginTop: "10px" }}>
-                <textarea
-                  value={editContent}
-                  onChange={(e) => setEditContent(e.target.value)}
-                  style={{
-                    width: "100%",
-                    padding: "10px",
-                    borderRadius: "8px",
-                    border: "1px solid #D1BFA7",
-                    resize: "none",
-                  }}
-                />
+            <div style={{ flex: 1 }}>
+              <b>{c.writer}</b>
+              <span style={{ marginLeft: "10px", color: "#A59080" }}>
+                {formatDate(c.createdAt)}
+              </span>
 
-                <div style={{ marginTop: "10px", display: "flex", gap: "10px" }}>
-                  <button
-                    onClick={() => handleUpdateComment(c.id)}
+              {/* 수정 모드 */}
+              {editingId === c.id ? (
+                <div style={{ marginTop: "10px" }}>
+                  <textarea
+                    value={editContent}
+                    onChange={(e) => setEditContent(e.target.value)}
                     style={{
-                      padding: "6px 12px",
-                      backgroundColor: "#C4A58A",
+                      width: "100%",
+                      padding: "10px",
                       borderRadius: "8px",
-                      border: "none",
-                      color: "#4A332C",
+                      border: "1px solid #D1BFA7",
+                      resize: "none",
                     }}
-                  >
-                    저장
-                  </button>
+                  />
 
+                  <div style={{ marginTop: "10px", display: "flex", gap: "10px" }}>
+                    <button
+                      onClick={() => handleUpdateComment(c.id)}
+                      style={{
+                        padding: "6px 12px",
+                        backgroundColor: "#C4A58A",
+                        borderRadius: "8px",
+                        border: "none",
+                        color: "#4A332C",
+                      }}
+                    >
+                      저장
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        setEditingId(null);
+                        setEditContent("");
+                      }}
+                      style={{
+                        padding: "6px 12px",
+                        backgroundColor: "#E5E5E5",
+                        borderRadius: "8px",
+                        border: "none",
+                      }}
+                    >
+                      취소
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <p style={{ marginTop: "5px" }}>{c.content}</p>
+              )}
+
+              {/* 수정/삭제 */}
+              {c.writer === username && editingId !== c.id && (
+                <div>
                   <button
                     onClick={() => {
-                      setEditingId(null);
-                      setEditContent("");
+                      setEditingId(c.id);
+                      setEditContent(c.content);
                     }}
                     style={{
-                      padding: "6px 12px",
-                      backgroundColor: "#E5E5E5",
-                      borderRadius: "8px",
+                      background: "none",
                       border: "none",
+                      color: "#6B4F3A",
+                      cursor: "pointer",
+                      fontSize: "13px",
+                      marginRight: "10px",
                     }}
                   >
-                    취소
+                    수정
+                  </button>
+
+                  <button
+                    onClick={() => handleDeleteComment(c.id)}
+                    style={{
+                      background: "none",
+                      border: "none",
+                      color: "red",
+                      cursor: "pointer",
+                      fontSize: "13px",
+                    }}
+                  >
+                    삭제
                   </button>
                 </div>
-              </div>
-            ) : (
-              <p style={{ marginTop: "5px" }}>{c.content}</p>
-            )}
-
-            {/* 수정/삭제 버튼 */}
-            {c.writer === username && editingId !== c.id && (
-              <div>
-                <button
-                  onClick={() => {
-                    setEditingId(c.id);
-                    setEditContent(c.content);
-                  }}
-                  style={{
-                    background: "none",
-                    border: "none",
-                    color: "#6B4F3A",
-                    cursor: "pointer",
-                    fontSize: "13px",
-                    marginRight: "10px",
-                  }}
-                >
-                  수정
-                </button>
-
-                <button
-                  onClick={() => handleDeleteComment(c.id)}
-                  style={{
-                    background: "none",
-                    border: "none",
-                    color: "red",
-                    cursor: "pointer",
-                    fontSize: "13px",
-                  }}
-                >
-                  삭제
-                </button>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         ))}
       </div>
