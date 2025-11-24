@@ -13,7 +13,7 @@
 
 ## 📸 화면 구성 (Screenshots)
 
-### 🔐 로그인 회원가입
+### 🔐 로그인
 ![login](https://github.com/user-attachments/assets/c6cc171c-99be-43c7-9d14-57a50b69f1bd)
 
 ---
